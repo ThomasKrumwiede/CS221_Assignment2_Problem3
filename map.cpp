@@ -1,3 +1,8 @@
+/* map.cpp
+   Thomas Krumwiede
+   12/3/24
+   This is the cpp file that contains the imlementation of
+   the map class required for Assignment 2 problem 3*/
 #include "map.h"
 #include <stdexcept>
 
@@ -6,23 +11,24 @@ using namespace std;
 
 
 // Default constructor: initializes an empty hash table
-//map::map() : table(TABLE_SIZE), num_elements(0) {}
-
-// Destructor
-//map::~map() = default;
+map::map() {
+    table = vector<list<pair<string, int>>>(TABLE_SIZE);
+    num_elements = 0;
+}
 
 size_t map::hash(const string& key) const{
     int sum = 0;
 
-    // Sum up ASCII values of characters in the key
+    // Sum the ASCII values of characters in the key
     for (size_t i = 0; i < key.length(); ++i) {
         char ch = key[i];
         sum += static_cast<int>(ch);
     }
 
-    // Return the bucket index (modulus operation)
+    // Return the bucket index
     return sum % TABLE_SIZE;
 }
+
 // Function to return the number of key-value pairs in the map
 int map::size() const {
     return num_elements;
@@ -53,13 +59,6 @@ void map::erase(const string & key) {
     throw out_of_range("Key not found: " + key);
 }
 
-// Function to return a key comparison object
-//std::function<bool(const std::string&, const std::string&)> key_compare() const {
-    // Compare keys by lexicographical order
-   // return [](const std::string& key1, const std::string& key2) {
-     //   return key1 < key2;
-   // };
-//}
 
 // Function to insert a key-value pair into the map
 void map::set(const string& key, int value) {
@@ -88,4 +87,63 @@ void map::display() const {
         }
         cout << endl;
     }
+}
+
+// Key_compare function 
+map::KeyCompare map::key_compare() const {
+    return KeyCompare{};
+}
+
+// Operator Overloads:
+
+// Overload of []
+int& map::operator[](const string& key) {
+    size_t index = hash(key);
+    list<pair<string, int>>& location = table[index]; // Get the bucket (list of pairs)
+
+   // Check if the key exists
+    for (list<pair<string, int>>::iterator it = location.begin(); it != location.end(); ++it) {
+        if (it->first == key) {
+            return it->second; // Return a const reference to the value
+        }
+    }
+
+    // If key is not found, throw an exception
+    throw out_of_range("out_of_range, Key not found: " + key);
+}
+
+// Overload of == 
+bool map::operator==(const map& other) const {
+    // Check if the sizes are different
+    if (num_elements != other.num_elements) {
+        return false;
+    }
+
+    // Iterate through all buckets in this map
+    for (size_t i = 0; i < TABLE_SIZE; ++i) {
+        const list<pair<string, int>>& thisBucket = table[i];
+        const list<pair<string, int>>& otherBucket = other.table[i];
+
+        // Compare the size of the buckets
+        if (thisBucket.size() != otherBucket.size()) {
+            return false;
+        }
+
+        // Compare all elements in the buckets
+        for (const pair<string, int>& thisPair : thisBucket) {
+            bool found = false;
+            for (const pair<string, int>& otherPair : otherBucket) {
+                if (thisPair == otherPair) { // Compare keys and values
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return false; // A mismatch was found
+            }
+        }
+    }
+
+    // If all checks pass, the maps are equal
+    return true;
 }

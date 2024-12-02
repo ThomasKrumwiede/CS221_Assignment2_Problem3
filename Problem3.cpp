@@ -1,3 +1,8 @@
+/* Problem3.cpp
+   Thomas Krumwiede
+   12/3/24
+   This is the cpp file that contains the main function to test the 
+   implementation of the map class for Assignment 2 problem 3*/
 #include <iostream>
 #include <vector>
 #include <list>
@@ -6,128 +11,75 @@
 
 #include "map.h"
 
-/*
-class HashMap {
-private:
-    static const int TABLE_SIZE = 10; // Fixed size for hash table
-    std::vector<std::list<std::pair<std::string, int>>> table; // Hash table
-    int num_elements; // Tracks the number of key-value pairs in the map
 
-    // Hash function for strings
-    size_t hash(const std::string& key) const {
-        std::hash<std::string> hash_fn;
-        return hash_fn(key) % TABLE_SIZE;
-    }
-
-public:
-    // Default constructor: initializes an empty hash table
-    HashMap() : table(TABLE_SIZE), num_elements(0) {}
-
-    // Destructor
-    ~HashMap() = default;
-
-    // Function to return the number of key-value pairs in the map
-    int size() const {
-        return num_elements;
-    }
-
-    // Function to return the number of elements with a specific key
-    int count(const std::string& key) const {
-        size_t index = hash(key);
-        for (const auto& pair : table[index]) {
-            if (pair.first == key) {
-                return 1; // Key found
-            }
-        }
-        return 0; // Key not found
-    }
-
-    // Function to erase a key-value pair identified by the key
-    void erase(const std::string& key) {
-        size_t index = hash(key);
-        auto& chain = table[index];
-        for (auto it = chain.begin(); it != chain.end(); ++it) {
-            if (it->first == key) {
-                chain.erase(it);
-                --num_elements;
-                return;
-            }
-        }
-        throw std::out_of_range("Key not found: " + key);
-    }
-
-    // Function to return a key comparison object
-    std::function<bool(const std::string&, const std::string&)> key_compare() const {
-        // Compare keys by lexicographical order
-        return [](const std::string& key1, const std::string& key2) {
-            return key1 < key2;
-        };
-    }
-
-    // Function to insert a key-value pair into the map
-    void insert(const std::string& key, int value) {
-        size_t index = hash(key);
-        auto& chain = table[index];
-
-        // Check if the key already exists
-        for (auto& pair : chain) {
-            if (pair.first == key) {
-                pair.second = value; // Update the value if key exists
-                return;
-            }
-        }
-
-        // Key does not exist, insert a new key-value pair
-        chain.emplace_back(key, value);
-        ++num_elements;
-    }
-
-    // Function to display the contents of the hash map (for testing purposes)
-    void display() const {
-        for (size_t i = 0; i < table.size(); ++i) {
-            std::cout << "Bucket " << i << ": ";
-            for (const auto& pair : table[i]) {
-                std::cout << "{" << pair.first << ": " << pair.second << "} ";
-            }
-            std::cout << std::endl;
-        }
-    }
-};
-*/
 int main() {
     map test1;
 
-    // Test insertion
-    test1.set("Alice", 30);
-    test1.set("Bob", 25);
-    test1.set("Charlie", 35);
-    test1.set("Alice", 40); // Update value for existing key
+    // test insertion
+    test1.set("Adam", 30);
+    test1.set("Bill", 25);
+    test1.set("Chuck", 35);
+    test1.set("Adam", 40); // update the existing key value 
 
-    // Display map
+    // display map
     test1.display();
 
-    // Test size
+    // test size
     std::cout << "Size: " << test1.size() << std::endl;
 
-    // Test count
-    std::cout << "Count for 'Alice': " << test1.count("Alice") << std::endl;
+    // test count
+    std::cout << "Count for 'Adam': " << test1.count("Adam") << std::endl;
     std::cout << "Count for 'David': " << test1.count("David") << std::endl;
 
-    // Test erase
-    test1.erase("Bob");
-    std::cout << "After erasing 'Bob':" << std::endl;
+    // test erase
+    test1.erase("Bill");
+    std::cout << "After erasing 'Bill':" << std::endl;
     test1.display();
 
-    // Test key comparison
-    //auto comp = map.key_compare();
-    //std::cout << "Key comparison ('Alice' < 'Charlie'): " << comp("Alice", "Charlie") << std::endl;
+    // test key_comparison based on lexographical order 
+    map::KeyCompare compairison = test1.key_compare(); // declair comparison object 
+    string key1 = "Adam";
+    string key2 = "Chuck";
+    // true condition 
+    if (compairison(key1, key2)) {
+        cout << "Adam is less than Chuck" << endl;
+    }
+    else {
+        cout << "Aadam is not less than Chuck" << endl; 
+    }
+    // false condition 
+    if (compairison(key2, key1)) {
+        cout << "Chuck is less than Adam" << endl;
+    }
+    else {
+        cout << "Chuck is not less than Adam" << endl;
+    }
 
+
+    // try to erase a key that does not exist 
     try {
-        test1.erase("Bob"); // Attempt to erase non-existing key
+        test1.erase("Bill");
     }
-    catch (const std::out_of_range& e) {
-        std::cerr << e.what() << std::endl;
+    catch (const out_of_range& e) {
+        cout << e.what() << std::endl;
     }
+
+   
+    // test overload opperators 
+    // test []
+    cout << "Test Overload of the [] opperator, ['Aadam']: " << test1["Adam"] << endl;
+    // test == 
+    map test2;
+    test2.set("Adam", 40);
+    // unequal map 
+    bool attempt; // variable to hold the return of the == overload 
+    attempt = test1 == test2;
+    cout << "Does map1 == map2: " << attempt << endl; // should be false 
+    // equal map 
+    test2.set("Chuck", 35);
+    cout << "Insert missing pair" << endl;
+    attempt = test1 == test2;
+    cout << "Does map1 == map2: " << attempt << endl; // should be true 
 
     return 0;
 }
